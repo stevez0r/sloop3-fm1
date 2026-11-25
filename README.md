@@ -20,7 +20,7 @@ can go back at any time with the backup the installer makes.
 **[Install it from your browser →](https://isod89.github.io/sloop3-fm1/)** (Chrome or Edge, a USB data cable, through
 m-bootloader)
 
-**[The guide →](docs/GUIDE.md)** · **[The web editor →](https://isod89.github.io/sloop3-fm1/editor.html)**
+**[The user guide →](https://stevez0r.github.io/sloop3-fm1/)** (new to the FM-1: start here) · **[What changed from SLOOP 2.8 →](docs/GUIDE.md)** · **[The web editor →](https://isod89.github.io/sloop3-fm1/editor.html)**
 
 ## What's new
 
