@@ -2812,8 +2812,92 @@ static void sc_freetake(void)
         tap(B_SEQ); wait_ms(200);
     }
 }
+/* the user guide's screens (docs/guide.html, tools/guide_shots.sh): the demo project, walked through as a user
+ * would, a screenshot at each step the guide shows. OUT/g-*.ppm, and the page as text (dumpv) in the log */
+static void gshot(const char *name) { wait_ms(120); shot(name); dumpv(name); }
+static void go_trk(int t) { if (trk == t) return; turn(ENC_ALGORITHM, -6); wait_ms(80); for (int i = 0; i < 5 && trk != t; i++) { turn(ENC_ALGORITHM, 1); wait_ms(80); } }   /* (ALGORITHM: the tracks as the screen lists them) */
+static float g_bpm;
+static void first_page(int b) { tap(B_HOME); wait_ms(150); tap(b); wait_ms(200); turn(ENC_SELECT, -12); wait_ms(250); if (Q.bpm != g_bpm) tempo(g_bpm); }   /* a button's first page (SELECT at the first page turns the tempo: set back) */
+static void next_page(void);
+static void next_page(void) { turn(ENC_SELECT, 1); wait_ms(250); if (Q.bpm != g_bpm) tempo(g_bpm); }
+static void sc_guide(void)
+{
+    wait_ms(1100); shot("g-logo");                                   /* the logo drawing itself in */
+    boot_wait(); for (int i = 0; i < 400 && splash_on; i++) wait_ms(10); wait_ms(300);
+    int dt = 0; for (int t = 0; t < NTRK; t++) if (is_drum(t)) dt = t;
+    g_bpm = Q.bpm; go_trk(0); gshot("g-tracks");
+    /* the sequencer's sheets, stopped (the note's sheet, OCT+ held) */
+    tap(B_SEQ); wait_ms(300); turn(ENC_SELECT, -12); wait_ms(300); gshot("g-notes");
+    press(B_OCTU); wait_ms(800); shot("g-notes-sheet"); release(B_OCTU); wait_ms(300); tap(B_OCTU); wait_ms(300);
+    go_trk(dt); tap(B_HOME); wait_ms(150); tap(B_EDIT); wait_ms(200); for (int i = 0; i < 4 && sticky != 1; i++) { tap(B_EDIT); wait_ms(200); } gshot("g-drums");
+    turn(ENC_KNOB1, 2); wait_ms(300); gshot("g-drums-snare"); turn(ENC_KNOB1, -2); wait_ms(200);
+    press(B_OCTU); wait_ms(800); shot("g-drums-sheet"); release(B_OCTU); wait_ms(300); tap(B_OCTU); wait_ms(300);
+    tap(B_HOME); wait_ms(300); go_trk(0);
+    tap(B_PLAY); wait_ms(2600); gshot("g-tracks-play");
+    /* sounds: PRESETS turned; EDIT's last page, SOUNDS */
+    turn(ENC_PRESETS, 1); wait_ms(300); gshot("g-sounds-presets");
+    turn(ENC_PRESETS, -1); wait_ms(4500);
+    first_page(B_EDIT); for (int i = 0; i < 8 && sticky != 32; i++) { tap(B_EDIT); wait_ms(200); } gshot("g-sounds");
+    turn(ENC_KNOB1, 1); wait_ms(250); gshot("g-sounds-cat"); turn(ENC_KNOB1, -1); wait_ms(200);
+    /* shaping a sound (track 2): EDIT's pages, ENV, LFO */
+    go_trk(1);
+    first_page(B_EDIT); gshot("g-edit1"); next_page(); gshot("g-edit2"); next_page(); gshot("g-filter"); next_page(); gshot("g-voice"); next_page(); gshot("g-voice2");
+    first_page(B_ENV); gshot("g-env"); next_page(); gshot("g-envdest");
+    first_page(B_LFO); gshot("g-lfo"); next_page(); gshot("g-lfo2"); next_page(); gshot("g-lfodest");
+    /* effects */
+    first_page(B_FX); gshot("g-fx"); next_page(); gshot("g-fx-filter"); next_page(); wait_ms(700); gshot("g-fx-slicer");
+    next_page(); gshot("g-fx-insert"); next_page(); gshot("g-fx-insert2"); next_page(); gshot("g-fx-delay"); next_page(); gshot("g-fx-reverb");
+    tap(B_HOME); wait_ms(200);
+    press(B_FX); wait_ms(700); gshot("g-punch");
+    keydown(white_key[4]); wait_ms(600); gshot("g-punch-on"); keyup(white_key[4]); wait_ms(200);
+    release(B_FX); wait_ms(400);
+    /* the sequencer: NOTES, PATTERN, SONG; SEQ held: STEPS */
+    go_trk(0);
+    first_page(B_SEQ); wait_ms(300); gshot("g-notes-play"); tap(B_SEQ); wait_ms(250); gshot("g-pattern"); tap(B_SEQ); wait_ms(250); gshot("g-song");
+    tap(B_HOME); wait_ms(200);
+    press(B_SEQ); wait_ms(700); gshot("g-steps"); release(B_SEQ); wait_ms(300);
+    /* the drums */
+    go_trk(dt); tap(B_HOME); wait_ms(300); gshot("g-tracks-drums");
+    tap(B_EDIT); wait_ms(200); for (int i = 0; i < 4 && sticky != 1; i++) { tap(B_EDIT); wait_ms(200); } wait_ms(300); gshot("g-drums-play"); tap(B_EDIT); wait_ms(250); gshot("g-kit"); tap(B_EDIT); wait_ms(250); gshot("g-drumsound");
+    tap(B_HOME); wait_ms(200);
+    /* chords, scales, arps (track 3) */
+    go_trk(2);
+    first_page(B_SEL); gshot("g-sel"); next_page(); gshot("g-sel2"); tap(B_HOME); wait_ms(200);
+    press(B_SEL); wait_ms(700); gshot("g-key"); release(B_SEL); wait_ms(300);
+    first_page(B_ARP); gshot("g-arp"); next_page(); gshot("g-arp2"); tap(B_HOME); wait_ms(200);
+    press(B_ARP); wait_ms(700); gshot("g-roll"); release(B_ARP); wait_ms(300);
+    /* mixing, global */
+    press(B_GLO); wait_ms(700); gshot("g-mix"); release(B_GLO); wait_ms(300);
+    first_page(B_GLO); gshot("g-global"); next_page(); gshot("g-master"); tap(B_HOME); wait_ms(200);
+    /* erase */
+    press(B_EDIT); wait_ms(700); gshot("g-erase"); release(B_EDIT); wait_ms(300);
+    /* saving: SAVE held, a pattern's key held 1.5 s */
+    tap(B_HOME); wait_ms(300); press(B_SAVE); wait_ms(700); gshot("g-save-held");
+    keydown(white_key[1]); wait_ms(800); gshot("g-save-filling"); wait_ms(1000); gshot("g-save-done"); keyup(white_key[1]); wait_ms(200);
+    release(B_SAVE); wait_ms(500); gshot("g-saved");
+    wait_ms(2500);
+    tap(B_HOME); wait_ms(200); tap(B_SAVE); wait_ms(400); gshot("g-songpage"); tap(B_SAVE); wait_ms(400); gshot("g-project");
+    tap(B_HOME); wait_ms(300);
+    /* the menu */
+    press(B_HOME); wait_ms(1200); gshot("g-menu");
+    turn(ENC_SELECT, 2); wait_ms(300); gshot("g-menu-audio"); turn(ENC_SELECT, 2); wait_ms(300); gshot("g-menu-system"); turn(ENC_SELECT, -8); wait_ms(200);
+    release(B_HOME); wait_ms(300); tap(B_HOME); wait_ms(300);
+    /* the visualiser */
+    tap(B_HOME); wait_ms(800); gshot("g-vis"); tap(B_HOME); wait_ms(300);
+    /* recording: REC while it plays */
+    go_trk(1); tap(B_REC); wait_ms(400); gshot("g-rec");
+    for (int i = 0; i < 4; i++) { tapkey(white_key[4 + i * 2]); wait_ms(250); }
+    wait_ms(300); gshot("g-rec-notes");
+    tap(B_REC); wait_ms(300); tap(B_PLAY); wait_ms(600);
+    /* a new project (HOME held + key 3, twice), REC while stopped: REC READY */
+    press(B_HOME); wait_ms(900); keydown(white_key[2]); wait_ms(200); keyup(white_key[2]); wait_ms(300); release(B_HOME); wait_ms(300); gshot("g-new-ask");
+    press(B_HOME); wait_ms(900); keydown(white_key[2]); wait_ms(200); keyup(white_key[2]); wait_ms(300); release(B_HOME); wait_ms(600); gshot("g-new");
+    tap(B_HOME); wait_ms(300);
+    tap(B_REC); wait_ms(2200); gshot("g-rec-ready");
+    tap(B_REC); wait_ms(300);
+}
 static const struct { const char *name; void (*fn)(void); } SC[] = {
-    { "freetake", sc_freetake }, { "drums285", sc_drums285 }, { "savestutter", sc_savestutter }, { "savepat", sc_savepat }, { "oversave", sc_oversave }, { "recsave", sc_recsave }, { "sections", sc_sections },
+    { "guide", sc_guide }, { "freetake", sc_freetake }, { "drums285", sc_drums285 }, { "savestutter", sc_savestutter }, { "savepat", sc_savepat }, { "oversave", sc_oversave }, { "recsave", sc_recsave }, { "sections", sc_sections },
     { "boot", sc_boot }, { "reboot", sc_reboot }, { "sounds", sc_sounds }, { "ukit", sc_ukit }, { "pages", sc_pages }, { "record", sc_record },
     { "powercut", sc_powercut }, { "aftercut", sc_after_cut }, { "sample", sc_sample }, { "editor", sc_editor },
     { "monkey", sc_monkey }, { "import", sc_import }, { "midi", sc_midi }, { "rescue", sc_rescue }, { "calib", sc_calib }, { "settings", sc_settings }, { "play", sc_play }, { "levels", sc_levels }, { "mixui", sc_mixui }, { "fx", sc_fx }, { "editor2", sc_editor2 }, { "serve", sc_serve }, { "vis", sc_vis }, { "banksave", sc_banksave }, { "punch", sc_punch }, { "film", sc_film }, { "inst", sc_inst }, { "lowend", sc_lowend }, { "tour", sc_tour }, { "saveproj", sc_saveproj }, { "selwalk", sc_selwalk }, { "punchsnd", sc_punchsnd }, { "midiimp", sc_midiimp }, { "arpall", sc_arpall }, { "chordrec", sc_chordrec }, { "songeng", sc_songeng }, { "midi2", sc_midi2 }, { "film2", sc_film2 }, { "bigproj", sc_bigproj }, { "bigcut", sc_bigcut }, { "punch2", sc_punch2 }, { "crumb", sc_crumb }, { "nan", sc_nan } };

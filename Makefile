@@ -64,3 +64,10 @@ build/demo: host/demo.c app/demo_song.c app/demo_song.h $(ENGINE) engine/engine.
 	mkdir -p build && $(CC) $(CFLAGS) -o $@ host/demo.c app/demo_song.c $(ENGINE) -lm
 clean:
 	rm -rf build
+# the PC twin on macOS (clang, Mach-O): no section tricks (host/macos.h), so no window check; for screenshots
+# (tools/guide_shots.sh). Needs build/fw/fw.area: from a release, or from index.html (tools/guide_shots.sh)
+build/twin-mac: $(TWINSRC) fw/main.c host/twin.h host/macos.h
+	mkdir -p build && clang -DHOST -O1 -g -std=gnu11 -w -ffp-contract=off -pthread -include host/macos.h \
+	  -Wl,-alias,_tw_nosect,___start_twlow -Wl,-alias,_tw_nosect,___stop_twlow \
+	  -Wl,-alias,_tw_nosect,___start_tw_xt -Wl,-alias,_tw_nosect,___stop_tw_xt \
+	  -o $@ $(TWINSRC) host/macos.c -lm
