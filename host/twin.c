@@ -2889,6 +2889,27 @@ static void sc_guide(void)
     for (int i = 0; i < 4; i++) { tapkey(white_key[4 + i * 2]); wait_ms(250); }
     wait_ms(300); gshot("g-rec-notes");
     tap(B_REC); wait_ms(300); tap(B_PLAY); wait_ms(600);
+    /* a step held in STEPS: its note, velocity, ratchet, nudge, and the lock ALGORITHM picks (a knob turned: the
+     * release keeps the step) */
+    go_trk(0); tap(B_HOME); wait_ms(200); press(B_SEQ); wait_ms(600); keydown(white_key[0]); wait_ms(600);
+    turn(ENC_ALGORITHM, 1); wait_ms(200); turn(ENC_ALGORITHM, -1); wait_ms(300); gshot("g-step-held");
+    keyup(white_key[0]); wait_ms(200); release(B_SEQ); wait_ms(300);
+    /* the sound's SAVE pages: PRESETS, USER, PATTERNS, TOOLS */
+    first_page(B_EDIT); tap(B_SAVE); wait_ms(300); gshot("g-save-presets");
+    next_page(); gshot("g-save-user"); next_page(); gshot("g-save-patterns"); next_page(); gshot("g-save-tools");
+    /* GLO's pages after GLOBAL and MASTER */
+    first_page(B_GLO); next_page(); next_page(); gshot("g-glo-system"); next_page(); gshot("g-glo-drums");
+    next_page(); gshot("g-texture"); next_page(); gshot("g-texture2"); next_page(); gshot("g-midi"); next_page(); gshot("g-midi2");
+    next_page(); gshot("g-glo-rec"); tap(B_HOME); wait_ms(200);
+    /* the SONG pages, then a chain: SAVE held, patterns 1 and 2 tapped */
+    {   /* (a song of four lines: an intro, a verse, a chorus, an outro) */
+        static const int PAT[4] = { 0, 0, 1, 0 }, BARS[4] = { 4, 8, 8, 4 };
+        seq_song_set_count(&Q, 4);
+        for (int i = 0; i < 4; i++) { seq_song_set_pat(&Q, i, -1, PAT[i]); seq_song_set_len(&Q, i, BARS[i]); }
+    }
+    tap(B_SAVE); wait_ms(400); turn(ENC_KNOB1, 2); wait_ms(300); gshot("g-song-lines"); tap(B_HOME); wait_ms(300);
+    press(B_SAVE); wait_ms(600); tapkey(white_key[0]); wait_ms(250); tapkey(white_key[1]); wait_ms(500); gshot("g-chain");
+    release(B_SAVE); wait_ms(300);
     /* a new project (HOME held + key 3, twice), REC while stopped: REC READY */
     press(B_HOME); wait_ms(900); keydown(white_key[2]); wait_ms(200); keyup(white_key[2]); wait_ms(300); release(B_HOME); wait_ms(300); gshot("g-new-ask");
     press(B_HOME); wait_ms(900); keydown(white_key[2]); wait_ms(200); keyup(white_key[2]); wait_ms(300); release(B_HOME); wait_ms(600); gshot("g-new");
